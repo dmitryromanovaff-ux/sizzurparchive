@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIZZURPARCHIVE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #222222;
+      --text: #e8e8e8;
+      --muted: #555555;
+      --accent: #c8ff00;
+      --accent2: #ff3c00;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'Space Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.6;
+      cursor: crosshair;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.5;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .logo:hover { color: var(--accent); }
+
+    nav { display: flex; gap: 32px; align-items: center; }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+
+    .cart-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 18px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: crosshair;
+      transition: all 0.2s;
+    }
+    .cart-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 120px 40px 60px;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 70% 40%, rgba(200,255,0,0.04) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 20% 80%, rgba(255,60,0,0.05) 0%, transparent 60%);
+    }
+
+    .hero-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(80px, 14vw, 200px);
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      animation: fadeUp 1s ease forwards;
+      opacity: 0;
+    }
+
+    .hero-title span { color: var(--accent); }
+
+    .hero-sub {
+      margin-top: 40px;
+      max-width: 480px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      animation: fadeUp 1s 0.3s ease forwards;
+      opacity: 0;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      right: 40px;
+      bottom: 60px;
+      writing-mode: vertical-rl;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      animation: fadeIn 1s 0.8s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+
+    /* ─── MARQUEE ─── */
+    .marquee-wrap {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      padding: 14px 0;
+      background: var(--surface);
+    }
+    .marquee {
+      display: flex;
+      gap: 60px;
+      width: max-content;
+      animation: marquee 20s linear infinite;
+    }
+    .marquee span {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .marquee span b { color: var(--accent); font-weight: 400; }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── SECTION ─── */
+    section { padding: 80px 40px; }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── PRODUCTS GRID ─── */
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 2px;
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .product-card:hover { border-color: var(--accent); }
+
+    .product-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: #161616;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 60px;
+      color: #1e1e1e;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6) 100%);
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 16px; left: 16px;
+      background: var(--accent2);
+      color: #fff;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      z-index: 2;
+    }
+
+    .product-info {
+      padding: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .product-price {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .product-sizes {
+      display: flex;
+      gap: 6px;
+    }
+    .size-tag {
+      font-size: 9px;
+      border: 1px solid var(--border);
+      padding: 3px 7px;
+      color: var(--muted);
+      cursor: crosshair;
+      transition: all 0.2s;
+    }
+    .size-tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .add-to-cart {
+      width: 100%;
+      margin-top: 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px;
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: crosshair;
+      transition: all 0.25s;
+    }
+    .add-to-cart:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    /* ─── ORDER FORM ─── */
+    #order {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .order-title {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 6vw, 80px);
+      line-height: 0.95;
+      margin-bottom: 40px;
+      grid-column: 1 / -1;
+    }
+    .order-title span { color: var(--accent); }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input, select, textarea {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 14px 16px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    select option { background: var(--bg); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .submit-btn {
+      grid-column: 1 / -1;
+      background: var(--accent);
+      border: none;
+      color: #000;
+      padding: 18px;
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.1em;
+      cursor: crosshair;
+      transition: opacity 0.2s;
+      text-transform: uppercase;
+    }
+    .submit-btn:hover { opacity: 0.85; }
+
+    .order-info {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 2;
+    }
+    .order-info a { color: var(--muted); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 48px;
+      color: var(--border);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: right;
+    }
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      width: 100%;
+      font-size: 10px;
+      color: #333;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ─── CART SIDEBAR ─── */
+    .cart-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+
+    .cart-sidebar {
+      position: fixed;
+      top: 0; right: -400px;
+      width: 380px;
+      height: 100vh;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      z-index: 201;
+      padding: 40px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto;
+    }
+    .cart-sidebar.open { right: 0; }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart-header h2 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      letter-spacing: 0.05em;
+    }
+    .close-cart {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: crosshair;
+      line-height: 1;
+    }
+    .close-cart:hover { color: var(--text); }
+
+    .cart-items { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+    .cart-item {
+      display: flex;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .cart-item-img {
+      width: 70px; height: 90px;
+      background: #1a1a1a;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: #222;
+    }
+    .cart-item-info { flex: 1; }
+    .cart-item-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .cart-item-price { color: var(--accent); font-size: 12px; }
+    .cart-item-remove {
+      background: none; border: none;
+      color: var(--muted); font-size: 18px;
+      cursor: crosshair; align-self: flex-start;
+    }
+    .cart-item-remove:hover { color: var(--accent2); }
+
+    .cart-empty {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .cart-total {
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart-total-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+    .cart-total-price { font-family: var(--font-display); font-size: 28px; color: var(--accent); }
+
+    .cart-checkout {
+      background: var(--accent);
+      border: none;
+      color: #000;
+      padding: 16px;
+      font-family: var(--font-display);
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      cursor: crosshair;
+      transition: opacity 0.2s;
+      text-transform: uppercase;
+    }
+    .cart-checkout:hover { opacity: 0.85; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--accent);
+      color: #000;
+      padding: 12px 28px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      z-index: 300;
+      transition: transform 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      header { padding: 16px 20px; }
+      nav { gap: 16px; }
+      .hero { padding: 100px 20px 50px; }
+      section { padding: 60px 20px; }
+      .order-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      footer { padding: 30px 20px; }
+      .footer-links { text-align: left; }
+      .cart-sidebar { width: 100%; right: -100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h2>КОРЗИНА</h2>
+    <button class="close-cart" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <p class="cart-empty">Корзина пуста</p>
+  </div>
+  <div class="cart-total">
+    <span class="cart-total-label">Итого</span>
+    <span class="cart-total-price" id="cartTotal">0 BYN</span>
+  </div>
+  <button class="cart-checkout" onclick="scrollToOrder()">ОФОРМИТЬ ЗАКАЗ</button>
+</div>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo">SIZZURPARCHIVE</a>
+  <nav>
+    <a href="#catalog">КАТАЛОГ</a>
+    <a href="#order">ЗАКАЗ</a>
+    <a href="#contacts">КОНТАКТЫ</a>
+  </nav>
+  <button class="cart-btn" onclick="openCart()">КОРЗИНА (<span id="cartCount">0</span>)</button>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <p class="hero-label">Archive Collection — 2025</p>
+  <h1 class="hero-title">SIZZURP<br><span>ARCHIVE</span></h1>
+  <p class="hero-sub">
+    Одежда для тех, кто живёт вне времени.<br>
+    Архивные вещи. Ограниченный дроп.
+  </p>
+  <span class="hero-scroll">↓ Скроллить</span>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <span>SIZZURPARCHIVE</span>
+    <span><b>✦</b> ARCHIVE DROP 2025</span>
+    <span>LIMITED EDITION</span>
+    <span><b>✦</b> FREE SHIPPING</span>
+    <span>SIZZURPARCHIVE</span>
+    <span><b>✦</b> ARCHIVE DROP 2025</span>
+    <span>LIMITED EDITION</span>
+    <span><b>✦</b> FREE SHIPPING</span>
+    <span>SIZZURPARCHIVE</span>
+    <span><b>✦</b> ARCHIVE DROP 2025</span>
+    <span>LIMITED EDITION</span>
+    <span><b>✦</b> FREE SHIPPING</span>
+  </div>
+</div>
+
+<!-- CATALOG -->
+<section id="catalog">
+  <p class="section-label">Каталог</p>
+  <div class="products" id="productsGrid">
+
+    <div class="product-card">
+      <div class="product-img" style="background:#121212;">
+        <div class="product-badge">NEW</div>
+        SA
+      </div>
+      <div class="product-info">
+        <div class="product-name">ARCHIVE HOODIE</div>
+        <div style="color:var(--muted);font-size:11px;">Оверсайз, тяжёлый хлопок</div>
+        <div class="product-meta">
+          <span class="product-price">120 BYN</span>
+          <div class="product-sizes">
+            <span class="size-tag">S</span>
+            <span class="size-tag">M</span>
+            <span class="size-tag">L</span>
+            <span class="size-tag">XL</span>
+          </div>
+        </div>
+        <button class="add-to-cart" onclick="addToCart('ARCHIVE HOODIE', 120)">В КОРЗИНУ</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img" style="background:#0e0e0e;">
+        SA
+      </div>
+      <div class="product-info">
+        <div class="product-name">SIZZURP TEE</div>
+        <div style="color:var(--muted);font-size:11px;">Принт, унисекс</div>
+        <div class="product-meta">
+          <span class="product-price">65 BYN</span>
+          <div class="product-sizes">
+            <span class="size-tag">S</span>
+            <span class="size-tag">M</span>
+            <span class="size-tag">L</span>
+          </div>
+        </div>
+        <button class="add-to-cart" onclick="addToCart('SIZZURP TEE', 65)">В КОРЗИНУ</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img" style="background:#141414;">
+        <div class="product-badge" style="background:var(--accent);color:#000;">SALE</div>
+        SA
+      </div>
+      <div class="product-info">
+        <div class="product-name">CARGO PANTS</div>
+        <div style="color:var(--muted);font-size:11px;">Широкий крой, 6 карманов</div>
+        <div class="product-meta">
+          <span class="product-price">145 BYN</span>
+          <div class="product-sizes">
+            <span class="size-tag">S</span>
+            <span class="size-tag">M</span>
+            <span class="size-tag">XL</span>
+          </div>
+        </div>
+        <button class="add-to-cart" onclick="addToCart('CARGO PANTS', 145)">В КОРЗИНУ</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img" style="background:#101010;">
+        SA
+      </div>
+      <div class="product-info">
+        <div class="product-name">ARCHIVE JACKET</div>
+        <div style="color:var(--muted);font-size:11px;">Nylon, лимитированный выпуск</div>
+        <div class="product-meta">
+          <span class="product-price">220 BYN</span>
+          <div class="product-sizes">
+            <span class="size-tag">M</span>
+            <span class="size-tag">L</span>
+          </div>
+        </div>
+        <button class="add-to-cart" onclick="addToCart('ARCHIVE JACKET', 220)">В КОРЗИНУ</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ORDER FORM -->
+<section id="order">
+  <div class="order-grid">
+    <h2 class="order-title">ОФОРМИТЬ<br><span>ЗАКАЗ</span></h2>
+
+    <div class="form-row" style="grid-column:1/-1;">
+      <div class="form-group">
+        <label>Имя</label>
+        <input type="text" placeholder="Иван" id="fname"/>
+      </div>
+      <div class="form-group">
+        <label>Фамилия</label>
+        <input type="text" placeholder="Иванов" id="lname"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" placeholder="you@example.com" id="email"/>
+    </div>
+
+    <div class="form-group">
+      <label>Телефон</label>
+      <input type="tel" placeholder="+375 (__)  ___-__-__" id="phone"/>
+    </div>
+
+    <div class="form-group" style="grid-column:1/-1;">
+      <label>Доставка</label>
+      <select id="delivery">
+        <option>Беларусь — Белпочта</option>
+        <option>СНГ — СДЭК</option>
+        <option>Мир — International</option>
+        <option>Россия — Почта России</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="grid-column:1/-1;">
+      <label>Адрес доставки</label>
+      <input type="text" placeholder="Город, улица, дом, квартира" id="address"/>
+    </div>
+
+    <div class="form-group">
+      <label>Почтовый индекс</label>
+      <input type="text" placeholder="220000" id="index"/>
+    </div>
+
+    <div class="form-group">
+      <label>Telegram</label>
+      <input type="text" placeholder="@username" id="tg"/>
+    </div>
+
+    <div class="form-group" style="grid-column:1/-1;">
+      <label>Промокод</label>
+      <input type="text" placeholder="Введи промокод" id="promo"/>
+    </div>
+
+    <button class="submit-btn" onclick="submitOrder()">ОТПРАВИТЬ ЗАКАЗ</button>
+  </div>
+</section>
+
+<!-- CONTACTS -->
+<section id="contacts" style="border-top:1px solid var(--border);">
+  <p class="section-label">Контакты</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;max-width:700px;">
+    <div>
+      <p style="color:var(--muted);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:12px;">Написать нам</p>
+      <p style="font-size:13px;">Telegram: <a href="https://t.me/" style="color:var(--accent);text-decoration:none;">@sizzurparchive</a></p>
+      <p style="font-size:13px;margin-top:8px;">Email: <a href="mailto:sizzurparchive@gmail.com" style="color:var(--accent);text-decoration:none;">sizzurparchive@gmail.com</a></p>
+    </div>
+    <div>
+      <p style="color:var(--muted);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:12px;">Время работы</p>
+      <p style="font-size:13px;">ПН–ПТ: 10:00 – 22:00</p>
+      <p style="font-size:13px;margin-top:8px;color:var(--muted);">СБ–ВС: выходные</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">SA</div>
+  <div class="footer-links">
+    <a href="#catalog">Каталог</a>
+    <a href="#order">Заказ</a>
+    <a href="#contacts">Контакты</a>
+  </div>
+  <div class="footer-copy">
+    <span>© 2025 SIZZURPARCHIVE — все права защищены</span>
+    <span>Сделано с душой</span>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let cart = [];
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function addToCart(name, price) {
+    cart.push({ name, price });
+    updateCart();
+    openCart();
+    showToast(name + ' → добавлено в корзину');
+  }
+
+  function removeFromCart(i) {
+    cart.splice(i, 1);
+    updateCart();
+  }
+
+  function updateCart() {
+    const el = document.getElementById('cartItems');
+    const count = document.getElementById('cartCount');
+    const total = document.getElementById('cartTotal');
+    count.textContent = cart.length;
+    if (cart.length === 0) {
+      el.innerHTML = '<p class="cart-empty">Корзина пуста</p>';
+      total.textContent = '0 BYN';
+      return;
+    }
+    el.innerHTML = cart.map((item, i) => `
+      <div class="cart-item">
+        <div class="cart-item-img">SA</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-price">${item.price} BYN</div>
+        </div>
+        <button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button>
+      </div>
+    `).join('');
+    const sum = cart.reduce((a, b) => a + b.price, 0);
+    total.textContent = sum + ' BYN';
+  }
+
+  function openCart() {
+    document.getElementById('cartSidebar').classList.add('open');
+    document.getElementById('cartOverlay').classList.add('open');
+  }
+
+  function closeCart() {
+    document.getElementById('cartSidebar').classList.remove('open');
+    document.getElementById('cartOverlay').classList.remove('open');
+  }
+
+  function scrollToOrder() {
+    closeCart();
+    document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function submitOrder() {
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const delivery = document.getElementById('delivery').value;
+    const address = document.getElementById('address').value.trim();
+    const index = document.getElementById('index').value.trim();
+    const tg = document.getElementById('tg').value.trim();
+    const promo = document.getElementById('promo').value.trim();
+
+    if (!fname || !email) {
+      showToast('⚠ Заполни имя и email');
+      return;
+    }
+
+    const cartText = cart.length > 0
+      ? cart.map(i => `• ${i.name} — ${i.price} BYN`).join('\n')
+      : '(корзина пуста)';
+    const total = cart.reduce((a, b) => a + b.price, 0);
+
+    const message = `🛒 НОВЫЙ ЗАКАЗ — SIZZURPARCHIVE\n\n👤 ${fname} ${lname}\n📧 ${email}\n📞 ${phone}\n📦 Доставка: ${delivery}\n🏠 Адрес: ${address} ${index}\n✈️ Telegram: ${tg}\n🎟 Промокод: ${promo || '—'}\n\n📋 Товары:\n${cartText}\n\n💰 Итого: ${total} BYN`;
+
+    try {
+      await fetch(`https://api.telegram.org/bot8788592802:AAEQetxly4hYJGAfe1zLk-ZwYXZxVef2oo8/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: '848925557', text: message })
+      });
+      showToast('✓ Заказ отправлен! Ждём тебя');
+      cart = [];
+      updateCart();
+    } catch (e) {
+      showToast('⚠ Ошибка отправки, попробуй ещё раз');
+    }
+  }
+</script>
+</body>
+</html>
